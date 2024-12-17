@@ -1,0 +1,87 @@
+
+const apiKey = '72b2cb178ceb47bb48e33ad402e14ab1'; 
+document.addEventListener('DOMContentLoaded', () => {
+
+const searchButton = document.getElementById('search-button');
+const locationInput = document.getElementById('location-input');
+const loadingSpinner = document.getElementById('loading-spinner');
+const weatherImage = document.getElementById('weather-image');
+const temperature = document.getElementById('temperature');
+const description = document.getElementById('description');
+const humidity = document.getElementById('humidity');
+const windSpeed = document.getElementById('wind-speed');
+
+// Weather Images for Different Conditions
+const weatherImages = {
+    clear: 'clear.png',
+    cloudy: 'cloudy.png',
+    rainy: 'rainy.png',
+    thunderstorm: 'thunderstorm.png',
+    snow: 'snow.png',
+    mist: 'mist.png'
+};
+
+// Fetch Weather Data
+async function getWeather(city) {
+    // Show loading spinner
+    loadingSpinner.style.display = 'block';
+    
+    try {
+        const response = await fetch(`https://api.openweathermap.org/data/2.5/weather?q=${city}&units=metric&appid=${apiKey}`);
+        const data = await response.json();
+
+        if (data.cod === "404") {
+            alert("City not found!");
+            loadingSpinner.style.display = 'none';
+            return;
+        }
+
+        // Hide the loading spinner
+        loadingSpinner.style.display = 'none';
+
+        // Update UI with the weather data
+        weatherImage.src = getWeatherImage(data.weather[0].main);
+        temperature.textContent = `${data.main.temp}°C`;
+        description.textContent = data.weather[0].description;
+        humidity.textContent = `${data.main.humidity}%`;
+        windSpeed.textContent = `${data.wind.speed} m/s`;
+    } catch (error) {
+        alert("Error fetching weather data. Please try again.");
+        loadingSpinner.style.display = 'none';
+    }
+}
+
+// Get the corresponding image based on the weather condition
+function getWeatherImage(weather) {
+    switch (weather.toLowerCase()) {
+        case 'clear':
+            return weatherImages.clear;
+        case 'clouds':
+            return weatherImages.cloudy;
+        case 'rain':
+            return weatherImages.rainy;
+        case 'thunderstorm':
+            return weatherImages.thunderstorm;
+        case 'snow':
+            return weatherImages.snow;
+        case 'mist':
+            return weatherImages.mist;
+        default:
+            return weatherImages.cloudy;  // Default to cloudy if no match
+    }
+}
+
+// Event Listener for the Search Button
+searchButton.addEventListener('click', () => {
+    const city = locationInput.value.trim();
+    if (city) {
+        getWeather(city);  // Fetch the weather data
+    } else {
+        alert("Please enter a city name.");
+    }
+});
+
+// Optional: Fetch default weather on page load
+getWeather('New York');  // Default city
+
+})
